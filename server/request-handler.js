@@ -9,39 +9,49 @@ You'll have to figure out a way to export this function from
 this file and include it in basic-server.js so that it actually works.
 
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
-
+{username: 'bob', message: 'trololo'}, {username: 'notBob', message: 'olololrt'}
 **************************************************************/
-var data = {results: [ {username: 'bob', text: 'trololo'}, {username: 'notBob', text: 'olololrt'}]};
+var defaultCorsHeaders = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'access-control-allow-headers': 'content-type, accept',
+  'access-control-max-age': 10 // Seconds.
+};
+//{username: 'bob', text: 'trololo'}, {username: 'notBob', text: 'olololrt'}
+var data = {results: []};
 
 var requestHandler = function(request, response) {
-  var statusCode = 200;
-  var postStatus = 201;
+  var headers = defaultCorsHeaders;
+  const { header, method, url } = request;
+  headers['Content-Type'] = 'application/json';
   // Request and Response come from node's http module.
-
+  
   if (request.method === 'GET' && request.url === '/classes/messages') {
-    console.log('test1');
+    request.on('error', (err) => {
+      console.error(err);
+      response.writeHead(404, headers);
+    });
     response.end(JSON.stringify(data));
-  }
+  } 
+  response.writeHead(200, headers);
 
   if (request.method === 'POST' && (request.url === '/classes/messages' || request.url === '/classes/room')) {
-  //   request.on('error', (err) => {
-  //     console.error(err);
-  //   }).on('data', (chunk) => {
-  //     data.results.push(chunk);
-  //   }).on('end', () => {
-  //     // data = Buffer.concat(data.results).toString();
-  //     response.end(data.results.push(JSON.parse(data)));
-  //   });
-
     let body = [];
-    request.on('data', (chunk) => {
+    var code = 201;
+    request.on('error', (err) => {
+      console.error(err);
+      code = 404;
+    }).on('data', (chunk) => {
       body.push(chunk);
     }).on('end', () => {
       body = Buffer.concat(body).toString();
+      data.results.push(JSON.parse(body));
+      response.writeHead(code, headers);
+      response.end();
     });
-    data.results.push(JSON.parse(body));
-    console.log(data);
   }
+
+
 
 
 
@@ -63,16 +73,13 @@ var requestHandler = function(request, response) {
   // The outgoing status.
 
   // See the note below about CORS headers.
-  var headers = defaultCorsHeaders;
 
-  const { header, method, url } = request;
   // Tell the client we are sending them plain text.
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'application/json';
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
+  
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
   // response.end() will be the body of the response - i.e. what shows
@@ -92,11 +99,5 @@ var requestHandler = function(request, response) {
 //
 // Another way to get around this restriction is to serve you chat
 // client from this domain by setting up static file serving.
-var defaultCorsHeaders = {
-  'access-control-allow-origin': '*',
-  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'access-control-allow-headers': 'content-type, accept',
-  'access-control-max-age': 10 // Seconds.
-};
 
 exports.requestHandler = requestHandler;
