@@ -22,7 +22,7 @@
 
 app = {
 
-  server: 'http://parse.CAMPUS.hackreactor.com/chatterbox/classes/messages',
+  server: 'http://127.0.0.1:3000/',
 
   init: function() {
     // Get username
@@ -79,6 +79,7 @@ app = {
       data: { order: '-createdAt' },
       contentType: 'application/json',
       success: function(json) {
+        console.log('test', json);
         app.displayMessages(json.results);
       },
       complete: function() {
@@ -97,6 +98,7 @@ app = {
       success: function(json) {
         message.objectId = json.objectId;
         app.displayMessage(message);
+        console.log('sucess', json);
       },
       complete: function() {
         app.stopSpinner();

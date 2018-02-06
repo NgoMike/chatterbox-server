@@ -13,7 +13,7 @@ this file and include it in basic-server.js so that it actually works.
 **************************************************************/
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
-  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'access-control-allow-methods': 'GET, POST, OPTIONS, DELETE, PUT',
   'access-control-allow-headers': 'content-type, accept',
   'access-control-max-age': 10 // Seconds.
 };
@@ -25,8 +25,10 @@ var requestHandler = function(request, response) {
   const { header, method, url } = request;
   headers['Content-Type'] = 'application/json';
   // Request and Response come from node's http module.
-  
-  if (request.method === 'GET' && request.url === '/classes/messages') {
+  if (request.method === 'OPTIONS') {
+    response.writeHead(200, headers);
+    response.end();
+  } else if (request.method === 'GET' && request.url === '/classes/messages') {
     // request.on('error', (err) => {
     //   console.error(err);
     //   // response.writeHead(404, headers);
@@ -55,7 +57,6 @@ var requestHandler = function(request, response) {
       response.end();
     });
   } else {
-    console.log(request.url, 'here is your error')
     response.statusCode = 404;
     response.end();
   }

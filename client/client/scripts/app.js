@@ -3,7 +3,7 @@ var app = {
 
   //TODO: The current 'handleUsernameClick' function just toggles the class 'friend'
   //to all messages sent by the user
-  server: 'http://127.0.0.1:3000/',
+  server: 'http://127.0.0.1:3000/classes/messages',
   username: 'anonymous',
   text: [],
 
@@ -27,6 +27,7 @@ var app = {
     app.fetch(false);
 
     // Poll for new messages
+    //***********************************************************
     setInterval(function() {
       app.fetch(true);
     }, 3000);
@@ -57,11 +58,12 @@ var app = {
     $.ajax({
       url: app.server,
       type: 'GET',
-      data: { order: '-createdAt' },
+      // data: { order: '-createdAt' },
       contentType: 'application/json',
       success: function(data) {
         // Don't bother if we have nothing to work with
         if (!data.results || !data.results.length) { return; }
+        console.log('success', data);
 
         // Store messages for caching later
         app.messages = data.results;
