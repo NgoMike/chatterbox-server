@@ -20,7 +20,7 @@ var defaultCorsHeaders = {
 //{username: 'bob', text: 'trololo'}, {username: 'notBob', text: 'olololrt'}
 var data = {results: []};
 
-var requestHandler = function(request, response) {
+exports.requestHandler = function(request, response) {
   var headers = defaultCorsHeaders;
   const { header, method, url } = request;
   headers['Content-Type'] = 'application/json';
@@ -35,27 +35,29 @@ var requestHandler = function(request, response) {
     // });
     response.writeHead(200, headers);
     response.end(JSON.stringify(data));
-  } else if (request.method === 'POST' && request.url === '/classes/messages') {
+  } else if (request.method === 'POST' && (request.url === '/classes/messages' || request.url === '/classes/room')) { 
     let body = [];
     request.on('data', (chunk) => {
       body.push(chunk);
     }).on('end', () => {
       body = Buffer.concat(body).toString();
-      data.results.push(JSON.parse(body));
-      response.writeHead(response.statusCode = 201, headers);
-      response.end();
-    });
-  } else if (request.url === '/classes/room' && request.method === 'POST') {
-    let body = [];
+      var formated = JSON.parse(body);
 
-    request.on('data', (chunk) => {
-      body.push(chunk);
-    }).on('end', () => {
-      body = Buffer.concat(body).toString();
-      data.results.push(JSON.parse(body));
-      response.writeHead(response.statusCode = 201, headers);
-      response.end();
+      data.results.push(formated);
+      response.writeHead(201, headers);
+      response.end(JSON.stringify({ message: 'donkey'}));
     });
+  // } else if (request.url === '/classes/room' && request.method === 'POST') {
+  //   let body = [];
+
+  //   request.on('data', (chunk) => {
+  //     body.push(chunk);
+  //   }).on('end', () => {
+  //     body = Buffer.concat(body).toString();
+  //     data.results.push(JSON.parse(body));
+  //     response.writeHead(response.statusCode = 201, headers);
+  //     response.end();
+  //   });
   } else {
     response.statusCode = 404;
     response.end();
@@ -105,4 +107,4 @@ var requestHandler = function(request, response) {
 // Another way to get around this restriction is to serve you chat
 // client from this domain by setting up static file serving.
 
-exports.requestHandler = requestHandler;
+// exports.requestHandler = requestHandler;

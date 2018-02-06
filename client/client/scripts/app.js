@@ -23,23 +23,25 @@ var app = {
     app.$roomSelect.on('change', app.handleRoomChange);
 
     // Fetch previous messages
-    app.startSpinner();
-    app.fetch(false);
+    // app.startSpinner();
+    app.fetch();
 
     // Poll for new messages
     //***********************************************************
     setInterval(function() {
-      app.fetch(true);
+      app.fetch();
     }, 3000);
   },
 
   send: function(message) {
-    app.startSpinner();
+    
+    // app.startSpinner();
 
     // POST the message to the server
     $.ajax({
       url: app.server,
       type: 'POST',
+      contentType: 'application/json',
       data: message,
       success: function (data) {
         // Clear messages input
@@ -67,21 +69,21 @@ var app = {
 
         // Store messages for caching later
         app.messages = data.results;
-
+        console.log(app.messages)
         // Get the last message
-        var mostRecentMessage = data.results[data.results.length - 1];
+        // var mostRecentMessage = data.results[data.results.length - 1];
 
-        // Only bother updating the DOM if we have a new message
-        if (mostRecentMessage.objectId !== app.lastMessageId) {
-          // Update the UI with the fetched rooms
-          app.renderRoomList(data.results);
+        // // Only bother updating the DOM if we have a new message
+        // if (mostRecentMessage.objectId !== app.lastMessageId) {
+        //   // Update the UI with the fetched rooms
+        //   // app.renderRoomList(data.results);
 
-          // Update the UI with the fetched messages
+        //   // Update the UI with the fetched messages
           app.renderMessages(data.results, animate);
 
           // Store the ID of the most recent message
-          app.lastMessageId = mostRecentMessage.objectId;
-        }
+          //app.lastMessageId = mostRecentMessage.objectId;
+        // }
       },
       error: function(error) {
         console.error('chatterbox: Failed to fetch messages', error);
@@ -94,17 +96,13 @@ var app = {
   },
 
   renderMessages: function(messages, animate) {
+    console.log('%%%%%')
     // Clear existing messages`
     app.clearMessages();
-    app.stopSpinner();
+    // app.stopSpinner();
     if (Array.isArray(messages)) {
       // Add all fetched messages that are in our current room
-      messages
-        .filter(function(message) {
-          return message.roomname === app.roomname ||
-                 app.roomname === 'lobby' && !message.roomname;
-        })
-        .forEach(app.renderMessage);
+      messages.forEach(app.renderMessage);
     }
 
     // Make it scroll to the top
@@ -113,39 +111,40 @@ var app = {
     }
   },
 
-  renderRoomList: function(messages) {
-    app.$roomSelect.html('<option value="__newRoom">New room...</option>');
+  // renderRoomList: function(messages) {
+  //   app.$roomSelect.html('<option value="__newRoom">New room...</option>');
 
-    if (messages) {
-      var rooms = {};
-      messages.forEach(function(message) {
-        var roomname = message.roomname;
-        if (roomname && !rooms[roomname]) {
-          // Add the room to the select menu
-          app.renderRoom(roomname);
+  //   if (messages) {
+  //     var rooms = {};
+  //     messages.forEach(function(message) {
+  //       var roomname = message.roomname;
+  //       if (roomname && !rooms[roomname]) {
+  //         // Add the room to the select menu
+  //         app.renderRoom(roomname);
 
-          // Store that we've added this room already
-          rooms[roomname] = true;
-        }
-      });
-    }
+  //         // Store that we've added this room already
+  //         rooms[roomname] = true;
+  //       }
+  //     });
+  //   }
 
-    // Select the menu option
-    app.$roomSelect.val(app.roomname);
-  },
+  //   // Select the menu option
+  //   app.$roomSelect.val(app.roomname);
+  // },
 
-  renderRoom: function(roomname) {
-    // Prevent XSS by escaping with DOM methods
-    var $option = $('<option/>').val(roomname).text(roomname);
+  // renderRoom: function(roomname) {
+  //   // Prevent XSS by escaping with DOM methods
+  //   var $option = $('<option/>').val(roomname).text(roomname);
 
-    // Add to select
-    app.$roomSelect.append($option);
-  },
+  //   // Add to select
+  //   app.$roomSelect.append($option);
+  // },
 
   renderMessage: function(message) {
-    if (!message.roomname) {
-      message.roomname = 'lobby';
-    }
+    console.log('$$$$$$$$$$$$$$$$$$$$$$$4', message)
+    // if (!message.roomname) {
+    //   message.roomname = 'lobby';
+    // }
 
     // Create a div to hold the chats
     var $chat = $('<div class="chat"/>');
@@ -153,12 +152,12 @@ var app = {
     // Add in the message data using DOM methods to avoid XSS
     // Store the username in the element's data attribute
     var $username = $('<span class="username"/>');
-    $username.text(message.username + ': ').attr('data-roomname', message.roomname).attr('data-username', message.username).appendTo($chat);
+    $username.text(message.username + ': ').attr('data-username', message.username).appendTo($chat);
 
     // Add the friend class
-    if (app.friends[message.username] === true) {
-      $username.addClass('friend');
-    }
+    // if (app.friends[message.username] === true) {
+    //   $username.addClass('friend');
+    // }
 
     var $message = $('<br><span/>');
     $message.text(message.text).appendTo($chat);
@@ -214,22 +213,22 @@ var app = {
     var message = {
       username: app.username,
       text: app.$message.val(),
-      roomname: app.roomname || 'lobby'
+      // roomname: app.roomname || 'lobby'
     };
-
-    app.send(message);
+ 
+    app.send(JSON.stringify(message));
 
     // Stop the form from submitting
     event.preventDefault();
   },
 
-  startSpinner: function() {
-    $('.spinner img').show();
-    $('form input[type=submit]').attr('disabled', 'true');
-  },
+  // startSpinner: function() {
+  //   $('.spinner img').show();
+  //   $('form input[type=submit]').attr('disabled', 'true');
+  // },
 
-  stopSpinner: function() {
-    $('.spinner img').fadeOut('fast');
-    $('form input[type=submit]').attr('disabled', null);
-  }
+  // stopSpinner: function() {
+  //   $('.spinner img').fadeOut('fast');
+  //   $('form input[type=submit]').attr('disabled', null);
+  // }
 };
