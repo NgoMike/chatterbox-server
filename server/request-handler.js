@@ -27,35 +27,39 @@ var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   
   if (request.method === 'GET' && request.url === '/classes/messages') {
-    request.on('error', (err) => {
-      console.error(err);
-      response.writeHead(404, headers);
-    });
+    // request.on('error', (err) => {
+    //   console.error(err);
+    //   // response.writeHead(404, headers);
+    // });
+    response.writeHead(200, headers);
     response.end(JSON.stringify(data));
-  } 
-  response.writeHead(200, headers);
-
-  if (request.method === 'POST' && (request.url === '/classes/messages' || request.url === '/classes/room')) {
+  } else if (request.method === 'POST' && request.url === '/classes/messages') {
     let body = [];
-    var code = 201;
-    request.on('error', (err) => {
-      console.error(err);
-      code = 404;
-    }).on('data', (chunk) => {
+    request.on('data', (chunk) => {
       body.push(chunk);
     }).on('end', () => {
       body = Buffer.concat(body).toString();
       data.results.push(JSON.parse(body));
-      response.writeHead(code, headers);
+      response.writeHead(response.statusCode = 201, headers);
       response.end();
     });
+  } else if (request.url === '/classes/room' && request.method === 'POST') {
+    let body = [];
+
+    request.on('data', (chunk) => {
+      body.push(chunk);
+    }).on('end', () => {
+      body = Buffer.concat(body).toString();
+      data.results.push(JSON.parse(body));
+      response.writeHead(response.statusCode = 201, headers);
+      response.end();
+    });
+  } else {
+    console.log(request.url, 'here is your error')
+    response.statusCode = 404;
+    response.end();
   }
-
-
-
-
-
-
+  
   // They include information about both the incoming request, such as
   // headers and URL, and about the outgoing response, such as its status
   // and content.
@@ -87,7 +91,7 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end(JSON.stringify(data));
+  // response.end(JSON.stringify(data));
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
