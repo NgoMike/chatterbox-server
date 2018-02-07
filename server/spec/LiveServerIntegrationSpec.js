@@ -73,5 +73,20 @@ describe('server', function() {
     });
   });
 
+  it('Should not 404 when asked for a existent endpoint', function(done) {
+    request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+      expect(response.statusCode).to.equal(200);
+      done();
+    });
+  });
+
+  it('should not send back an array', function(done) {
+    request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+      var parsedBody = JSON.parse(body);
+      expect(parsedBody).to.not.be.an('array');
+      done();
+    });
+  });
+
 
 });

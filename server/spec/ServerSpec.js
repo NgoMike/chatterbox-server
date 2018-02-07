@@ -23,6 +23,13 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
+  it('Should allow a request for OPTIONS', function() {
+    var req = new stubs.request('/classes/messages', 'OPTIONS');
+    var res = new stubs.response();
+    handler.requestHandler(req, res);
+    expect(res._responseCode).to.equal(200);
+  });
+
   it('Should send back parsable stringified JSON', function() {
     var req = new stubs.request('/classes/messages', 'GET');
     var res = new stubs.response();
@@ -87,7 +94,7 @@ describe('Node Server Request Listener Function', function() {
 
     expect(res._responseCode).to.equal(201);
 
-      // Now if we request the log for that room the message we posted should be there:
+    // Now if we request the log for that room the message we posted should be there:
     req = new stubs.request('/classes/messages', 'GET');
     res = new stubs.response();
 
@@ -101,6 +108,14 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
+  it('Should send headers', function() {
+    var req = new stubs.request('/classes/messages', 'GET');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(req.headers).to.equal(undefined);
+  });
 
   it('Should 404 when asked for a nonexistent file', function() {
     var req = new stubs.request('/arglebargle', 'GET');
@@ -115,5 +130,21 @@ describe('Node Server Request Listener Function', function() {
         expect(res._responseCode).to.equal(404);
       });
   });
+
+  it('Should not 404 when asked for an existent file', function() {
+    var req = new stubs.request('/classes/messages', 'GET');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    // Wait for response to return and then check status code
+    waitForThen(
+      function() { return res._ended; },
+      function() {
+        expect(res._responseCode).to.equal(200);
+      });
+  });
+
+
 
 });

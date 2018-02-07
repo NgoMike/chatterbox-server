@@ -69,7 +69,7 @@ var app = {
 
         // Store messages for caching later
         app.messages = data.results;
-        console.log(app.messages)
+        console.log(app.messages);
         // Get the last message
         // var mostRecentMessage = data.results[data.results.length - 1];
 
@@ -79,10 +79,10 @@ var app = {
         //   // app.renderRoomList(data.results);
 
         //   // Update the UI with the fetched messages
-          app.renderMessages(data.results, animate);
+        app.renderMessages(data.results, animate);
 
-          // Store the ID of the most recent message
-          //app.lastMessageId = mostRecentMessage.objectId;
+        // Store the ID of the most recent message
+        //app.lastMessageId = mostRecentMessage.objectId;
         // }
       },
       error: function(error) {
@@ -96,7 +96,6 @@ var app = {
   },
 
   renderMessages: function(messages, animate) {
-    console.log('%%%%%')
     // Clear existing messages`
     app.clearMessages();
     // app.stopSpinner();
@@ -141,7 +140,6 @@ var app = {
   // },
 
   renderMessage: function(message) {
-    console.log('$$$$$$$$$$$$$$$$$$$$$$$4', message)
     // if (!message.roomname) {
     //   message.roomname = 'lobby';
     // }
